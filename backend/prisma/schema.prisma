@@ -1,0 +1,151 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [uuidOssp(map: "uuid-ossp")]
+}
+
+model Organization {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  memberships Membership[]
+  projects    Project[]
+  tasks       Task[]
+  documents   Document[]
+
+  @@map("organizations")
+}
+
+model User {
+  id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  fullName     String?  @map("full_name")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  memberships Membership[]
+  tasks       Task[]        @relation("TaskAssignee")
+  createdTasks Task[]       @relation("TaskCreator")
+  comments    TaskComment[]
+
+  @@map("users")
+}
+
+model Role {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name        String   @unique // e.g. OWNER, ADMIN, MANAGER, MEMBER
+  description String?
+  
+  memberships Membership[]
+
+  @@map("roles")
+}
+
+model Membership {
+  id             String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  userId         String       @map("user_id") @db.Uuid
+  roleId         String       @map("role_id") @db.Uuid
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           Role         @relation(fields: [roleId], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, userId])
+  @@map("memberships")
+}
+
+model Project {
+  id             String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  name           String
+  key            String       @db.VarChar(10) // e.g., ENG, DES
+  description    String?
+  isArchived     Boolean      @default(false) @map("is_archived")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  tasks          Task[]
+
+  @@unique([organizationId, key])
+  @@map("projects")
+}
+
+model Task {
+  id             String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  projectId      String       @map("project_id") @db.Uuid
+  title          String
+  description    String?      @db.Text
+  status         String       @default("TODO") // TODO, IN_PROGRESS, REVIEW, DONE
+  priority       Int          @default(4) // 1: Urgent, 2: High, 3: Medium, 4: Low
+  order          Float        @default(0)
+  assigneeId     String?      @map("assignee_id") @db.Uuid
+  creatorId      String       @map("creator_id") @db.Uuid
+  dueDate        DateTime?    @map("due_date")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project        Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignee       User?        @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  creator        User         @relation("TaskCreator", fields: [creatorId], references: [id], onDelete: Restrict)
+  comments       TaskComment[]
+
+  @@index([organizationId, projectId])
+  @@index([organizationId, status])
+  @@map("tasks")
+}
+
+model TaskComment {
+  id             String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  taskId         String       @map("task_id") @db.Uuid
+  authorId       String       @map("author_id") @db.Uuid
+  content        String       @db.Text
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  task           Task         @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  author         User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@map("task_comments")
+}
+
+model Document {
+  id             String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  title          String
+  content        String?      @db.Text
+  isArchived     Boolean      @default(false) @map("is_archived")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  versions       DocumentVersion[]
+
+  @@index([organizationId])
+  @@map("documents")
+}
+
+model DocumentVersion {
+  id             String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  documentId     String       @map("document_id") @db.Uuid
+  content        String       @db.Text
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  document       Document     @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@map("document_versions")
+}

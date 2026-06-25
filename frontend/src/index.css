@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --color-border: oklch(0.3 0.05 280);
+  --color-input: oklch(0.3 0.05 280);
+  --color-ring: oklch(0.6 0.15 280);
+  --color-background: oklch(0.1 0.02 280); /* Deep indigo/purple black */
+  --color-foreground: oklch(0.98 0.01 280);
+  --color-primary: oklch(0.6 0.2 280); /* Vibrant violet/blue */
+  --color-primary-foreground: oklch(0.98 0.01 280);
+  --color-secondary: oklch(0.2 0.05 280);
+  --color-secondary-foreground: oklch(0.98 0.01 280);
+  --color-muted: oklch(0.15 0.03 280);
+  --color-muted-foreground: oklch(0.7 0.05 280);
+  --color-accent: oklch(0.6 0.2 280);
+  --color-accent-foreground: oklch(0.98 0.01 280);
+  --color-destructive: oklch(0.6 0.2 20);
+  --color-destructive-foreground: oklch(0.98 0.01 280);
+  --color-card: oklch(0.12 0.04 280);
+  --color-card-foreground: oklch(0.98 0.01 280);
+  --color-popover: oklch(0.12 0.04 280);
+  --color-popover-foreground: oklch(0.98 0.01 280);
+  --radius: 1rem;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #05050A; /* Very dark rich background */
+  color: #FAFAFA;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-20px) scale(1.05); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+
+/* Scrollbar hiding */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Premium glass effect */
+.glass-panel {
+  background: rgba(20, 20, 30, 0.4);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Glowing text */
+.text-glow {
+  text-shadow: 0 0 20px rgba(120, 119, 198, 0.5);
+}
