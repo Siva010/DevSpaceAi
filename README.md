@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>🚀 DevSpace</h1>
+  <h1>🚀 DevSpace "Multi-tenant project management"</h1>
   <p><strong>A Modern, High-Performance Workspace & Project Management Tool</strong></p>
 
   <p>
